@@ -455,9 +455,9 @@ def run_error_analysis(mut_fasta, workbook_input, load_xle=None, wild_seqs_set=N
 
 def print_usage():
 	print("Usage:")
-	print("Example: python run_error_analysisV12.py --mut_fasta ih_mut_custom_example_proteome.fasta --workbook_input example.xlsx --load_xle xle.pkl --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
-	print("Minimum 1: python run_error_analysisV12.py --mut_fasta ih_mut_custom_example_proteome.fasta --workbook_input example.xlsx --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
-	print("Minimum 2: python run_error_analysisV12.py --mut_fasta ih_mut_custom_example_proteome.fasta --file_list example_file_list.txt --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
+	print("Example: python run_error_analysis.py --mut_fasta ih_mut_custom_example_proteome.fasta --workbook_input example.xlsx --load_xle xle.pkl --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
+	print("Minimum 1: python run_error_analysis.py --mut_fasta ih_mut_custom_example_proteome.fasta --workbook_input example.xlsx --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
+	print("Minimum 2: python run_error_analysis.py --mut_fasta ih_mut_custom_example_proteome.fasta --file_list example_file_list.txt --gene_file genes.fasta --protein_file proteome.fasta --tt 11 --usage abs")
 	print("\nArguments:")
 	print("--mut_fasta     : Mutant FASTA file, made from generate_custom_database")
 	print("--workbook_input: Exported peptide groups tab from Proteome Discoverer, .xlsx format  (optional, but required if no --file_list is provided)")
