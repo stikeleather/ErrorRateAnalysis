@@ -88,9 +88,9 @@ def generate_custom_database(gen_xlsx,proteome_file,gene_file):
 		output_file = mutate(protein_output,2,1,gene_output)
 		print("Done")
 		print("For a list of files:")
-		print(f"\nPlease execute: python run_error_analysis.py --mut_fasta {output_file} --file_list {species}_file_list.txt --gene_file {species}_genes.fasta --protein_file {species}_proteome.fasta --tt <1-33> --usage abs")
+		print(f"Please execute: python run_error_analysis.py --mut_fasta {output_file} --file_list {species}_file_list.txt --gene_file {species}_genes.fasta --protein_file {species}_proteome.fasta --tt <1-33> --usage abs")
 		print(f"\nFor a single file:")
-		print(f"\nPlease execute: python run_error_analysis.py --mut_fasta {output_file} --workbook_input example.xlsx --gene_file {species}_genes.fasta --protein_file {species}_proteome.fasta --tt <1-33> --usage abs")
+		print(f"Please execute: python run_error_analysis.py --mut_fasta {output_file} --workbook_input example.xlsx --gene_file {species}_genes.fasta --protein_file {species}_proteome.fasta --tt <1-33> --usage abs")
 	else:
 		print("Unmatched sequences detected, resolve and execute again to generate mutant database")
 

@@ -5,7 +5,7 @@ import time
 import openpyxl
 from Bio import SeqIO
 import pickle
-from matrix_aa_subsV2 import matrix_aa_subs
+from matrix_aa_subs import matrix_aa_subs
 from generate_custom_database import fasta_to_dict
 from preprocess_peptides import preprocess_peptides
 import pandas as pd
@@ -260,7 +260,6 @@ def run_error_analysis(mut_fasta, workbook_input, load_xle=None, wild_seqs_set=N
 					print(f"Matched {unknown_count} of {total_unknowns} NSPs")
 					nsp_dic[f">{name_seq_dic[comp]}-nsp{nsp_start_number+unknown_count}"] = f"{test}"
 					mutant_fasta[f"{name_seq_dic[comp]}-nsp{nsp_start_number+unknown_count}"] = f"{test}"
-					wild_seqs_set.add(test)
 					test_terms.discard(test)
 					break
 		#If test terms still exist after searching for wilds, then search for mutants
@@ -316,7 +315,6 @@ def run_error_analysis(mut_fasta, workbook_input, load_xle=None, wild_seqs_set=N
 							mutant_name = f"mutant-{split_name[1]}-{split_name[2]}.{split_name[3]}.{mutation.group(1)}{sub_pos}{mutation.group(3)}-nsp{nsp_start_number+unknown_count}"
 							nsp_dic[f">{mutant_name}"] = f"{unk}"
 							mutant_fasta[f"{mutant_name}"] = f"{unk}"
-							mutant_seqs_set.add(unk)
 							test_terms.discard(unk)
 							break
 
@@ -407,7 +405,7 @@ def run_error_analysis(mut_fasta, workbook_input, load_xle=None, wild_seqs_set=N
 		for key in xle_nsps_to_pop:
 			mutant_fasta.pop(key)
 		for key in xle_nsps_to_add:
-			mutant_seqs_set.add(xle_nsps_to_add[key])
+			mutant_fasta[key] = xle_nsps_to_add[key]
 
 	#Math
 	wb.save(workbook_out)

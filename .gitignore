@@ -1,1 +1,9 @@
 *.tmp
+*.pyc
+*_pep99.xlsx
+homology_*.pkl
+ih_mut_custom*.fasta
+custom_*.fasta
+*_genes.fasta
+*_proteome.fasta
+xle*.pkl
