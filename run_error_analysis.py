@@ -6,11 +6,11 @@ import openpyxl
 from Bio import SeqIO
 import pickle
 from matrix_aa_subsV2 import matrix_aa_subs
-from generate_custom_databaseV2 import fasta_to_dict
-from preprocess_peptidesV2 import preprocess_peptides
+from generate_custom_database import fasta_to_dict
+from preprocess_peptides import preprocess_peptides
 import pandas as pd
 from openpyxl.styles import Font, Border, Side, Alignment
-from codon_biasV7 import codon_bias
+from codon_bias import codon_bias
 from calculate_stats import calculate_stats
 from format_matrix import format_matrix
 from codon_matrix import codon_matrix
