@@ -57,7 +57,7 @@ def read_file_names(file_input):
 		return file_names
 
 
-def codon_bias(input_file ,gene_file, protein_file, tt, usage):
+def codon_bias(input_file, gene_file, protein_file, tt, usage):
 
 	wild_table = {
 	'TTT': 0, 'TTC': 0, 'TTA': 0, 'TTG': 0, 'TAT': 0, 'TAC': 0, 'TAA': 0, 'TAG': 0, 

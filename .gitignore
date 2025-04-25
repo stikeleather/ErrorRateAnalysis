@@ -7,3 +7,4 @@ custom_*.fasta
 *_genes.fasta
 *_proteome.fasta
 xle*.pkl
+*_stats.xlsx

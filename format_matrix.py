@@ -4,7 +4,7 @@ from openpyxl.formatting.rule import ColorScaleRule
 import sys
 import getopt
 
-
+#test for updates
 def format_matrix(input_file, remove_artifacts=False):
 	wb = openpyxl.load_workbook(input_file)
 	ws = wb.active
