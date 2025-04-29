@@ -3,7 +3,7 @@ import getopt
 from Bio.Data import CodonTable
 import pandas as pd
 import numpy as np
-from generate_custom_database import fasta_to_dict
+from generate_custom_databaseV2 import fasta_to_dict
 import openpyxl
 from openpyxl.styles import Font, Border, Side, Alignment
 
@@ -24,6 +24,7 @@ def calculate_stats(gene_file, file_list, tt, output_file):
 
 	codon_list = sorted(temp_table.keys())
 	aa_list = [temp_table[codon] for codon in codon_list]
+	unique_aa = set(aa_list)
 
 	df = pd.DataFrame({
 		'AA': aa_list,
@@ -43,6 +44,7 @@ def calculate_stats(gene_file, file_list, tt, output_file):
 		file_count += 1
 		temp_df = pd.read_excel(file, sheet_name='Sheet1')
 		column_name = f'error_rate{file_count}'
+		column_name1 = f'RMR{file_count}'
 		column_name2 = f'codon_total{file_count}'
 		column_name3 = f'translation_error{file_count}'
 		error_rate_list.append(column_name)
@@ -54,6 +56,20 @@ def calculate_stats(gene_file, file_list, tt, output_file):
 			codon = str(row['codon']).replace('U', 'T')
 			df.loc[df['codon'] == codon, column_name] = row['error_rate']
 			df.loc[df['codon'] == codon, column_name2] = row['codon_total']
+			
+		for aa in df['AA'].unique():
+			aa_rows = df[df['AA'] == aa]
+			aa_total = len(aa_rows)
+			running_aa_total = aa_rows[column_name].sum()
+			mean_trans_error_rate_per_amino_family = running_aa_total / aa_total if aa_total != 0 else 0
+
+			for idx in aa_rows.index:
+				codon_error = df.at[idx, column_name]
+				if mean_trans_error_rate_per_amino_family != 0:
+					rmr = codon_error / mean_trans_error_rate_per_amino_family
+				else:
+					rmr = 0
+				df.at[idx, column_name1] = rmr
 
 	for codon in codon_list:
 		codon_df = df[df['codon'] == codon]
@@ -65,7 +81,7 @@ def calculate_stats(gene_file, file_list, tt, output_file):
 		df.loc[df['codon'] == codon, 'mean_error_rate'] = mean_error_rate
 		df.loc[df['codon'] == codon, 'std_dev'] = std_dev
 		df.loc[df['codon'] == codon, 'Std.Err.'] = std_err
-		df.loc[df['codon'] == codon, 'mean_codon_total'] = mean_codon_total
+		df.loc[df['codon'] == codon, 'mean_codon_total'] = mean_codon_total     
 
 	def calculate_rmr_and_se(row, df):
 		mean_error_rate = row['mean_error_rate']
