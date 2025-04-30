@@ -3,7 +3,7 @@ import getopt
 from Bio.Data import CodonTable
 import pandas as pd
 import numpy as np
-from generate_custom_databaseV2 import fasta_to_dict
+from generate_custom_database import fasta_to_dict
 import openpyxl
 from openpyxl.styles import Font, Border, Side, Alignment
 
