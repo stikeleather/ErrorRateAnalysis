@@ -16,11 +16,23 @@ def translate_gene(gene, tt):
 
 	gene_length = len(gene)
 	translated_gene = ''
-	for nt_codon in range(0, gene_length, 3):
+	codon = gene[0:3]
+
+	if codon in start_codons:
+		translated_gene += 'M'
+	elif codon == 'GTG':
+		translated_gene += 'M'
+	elif codon == 'TTG':
+		translated_gene += 'M'
+	elif codon == 'CTG':
+		translated_gene += 'M'
+	else:
+		translated_gene += aa_codons_dict[codon]
+
+	for nt_codon in range(3, gene_length, 3):
 		codon = gene[nt_codon:nt_codon + 3]
-		if nt_codon == 0 and codon in start_codons:
-			translated_gene += 'M'
-		elif nt_codon + 3 < gene_length and codon in stop_codons:
+					
+		if nt_codon + 3 < gene_length and codon in stop_codons:
 			translated_gene += 'U'
 		else:
 			translated_gene += aa_codons_dict[codon]
