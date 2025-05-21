@@ -18,3 +18,4 @@ xle*.pkl
 *.svg
 *.png
 *.lock
+.Rhistory
