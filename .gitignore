@@ -8,3 +8,13 @@ custom_*.fasta
 *_proteome.fasta
 xle*.pkl
 *_stats.xlsx
+*_nsp_homology.pkl
+*.ods
+*.xlsx
+*.txt
+*.gbff
+*.gbk
+*.gb
+*.svg
+*.png
+*.lock

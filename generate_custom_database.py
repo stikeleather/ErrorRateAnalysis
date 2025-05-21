@@ -9,12 +9,12 @@ def fasta_to_dict(fasta_file):
 	sequence_dict = {}
 	for record in SeqIO.parse(fasta_file, "fasta"):
 		if record.id in sequence_dict.keys():
-			print(f"Duplicate gene detected in fasta: {record.id}")
+			print(f"Duplicate record id detected in fasta: {record.id}")
 		else:
 			sequence_dict[record.id] = str(record.seq)
 	return sequence_dict
 
-def generate_custom_database(gen_xlsx,proteome_file,gene_file):
+def generate_custom_database(gen_xlsx, proteome_file, gene_file):
 	df = pd.read_excel(gen_xlsx)
 
 	proteome_dic = fasta_to_dict(proteome_file)
@@ -44,6 +44,8 @@ def generate_custom_database(gen_xlsx,proteome_file,gene_file):
 	species = re.match(pattern, split_proteome[0])
 	species = species.group(1)
 
+	written_sequences = set()
+
 	with open(protein_output, "w") as f, open(gene_output, 'w') as q:
 		for accession in accessions:
 			if ";" in accession:
@@ -53,13 +55,13 @@ def generate_custom_database(gen_xlsx,proteome_file,gene_file):
 					try:
 						pro_seq = proteome_dic[test_key]
 						gene_seq = gene_dic[test_key]
-						f.write(f">{test_key}\n")
-						f.write(f"{pro_seq}\n")
-						q.write(f">{test_key}\n")
-						q.write(f"{gene_seq}\n")
-						accession_count += 1
-						error_count = 0
-						break
+						if test_key not in written_sequences:
+							f.write(f">{test_key}\n")
+							f.write(f"{pro_seq}\n")
+							q.write(f">{test_key}\n")
+							q.write(f"{gene_seq}\n")
+							written_sequences.add(test_key)
+							accession_count += 1
 					except KeyError:
 						error_count += 1
 						if error_count == len(split_accession):
@@ -69,11 +71,13 @@ def generate_custom_database(gen_xlsx,proteome_file,gene_file):
 				try:
 					pro_seq = proteome_dic[accession]
 					gene_seq = gene_dic[accession]
-					f.write(f">{accession}\n")
-					f.write(f"{pro_seq}\n")
-					q.write(f">{accession}\n")
-					q.write(f"{gene_seq}\n")
-					accession_count += 1
+					if accession not in written_sequences:
+						f.write(f">{accession}\n")
+						f.write(f"{pro_seq}\n")
+						q.write(f">{accession}\n")
+						q.write(f"{gene_seq}\n")
+						written_sequences.add(accession)
+						accession_count += 1					
 				except KeyError:
 					print(f"Missing ID: {accession}")
 
@@ -85,8 +89,9 @@ def generate_custom_database(gen_xlsx,proteome_file,gene_file):
 	print(f"Matched {accession_count} of {accession_number} entries")
 
 	if accession_count == accession_number and len(unmatched_list) == 0:
-		output_file = mutate(protein_output,2,1,gene_output)
-		print("Done")
+		output_file = mutate(protein_output, 2, 1, gene_output)
+		print(f"Done\n")
+		print("Next, please run a mass-spec search with the custom mutant proteome output, then execute the following:\n")
 		print("For a list of files:")
 		print(f"Please execute: python run_error_analysis.py --mut_fasta {output_file} --file_list {species}_file_list.txt --gene_file {species}_genes.fasta --protein_file {species}_proteome.fasta --tt <1-33> --usage abs")
 		print(f"\nFor a single file:")

@@ -35,7 +35,7 @@ def find_match(protein_seq, peptide):
 	except ValueError:
 		return -1, -1
 
-def check_internal_homology(proteome_input,gene_input):
+def check_internal_homology(proteome_input, gene_input):
 	AA_dict = {'A': 71.04, 'R': 156.10, 'N': 114.04, 'D': 115.03, 'C': 103.00, 'E': 129.04, 'Q': 128.06, 'G': 57.02, 'H': 137.06, 'I': 113.08, 
 			   'L': 113.08, 'K': 128.09, 'M': 131.04, 'F': 147.07, 'P': 97.05, 'S': 87.03, 'T': 101.04, 'W': 186.08, 'Y': 163.06, 'V': 99.07}
 
@@ -61,8 +61,6 @@ def check_internal_homology(proteome_input,gene_input):
 				key = (f"{protein.id}-{count}")
 				pep_len = len(peptide)
 				seq_dic[pep_len][key] = peptide
-
-
 
 	genes = SeqIO.parse(gene_input,'fasta')
 	gene_dic = dict()

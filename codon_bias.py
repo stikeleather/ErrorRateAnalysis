@@ -9,18 +9,15 @@ from generate_custom_database import fasta_to_dict
 def find_mismatch(wt_seq, mut_seq):
 	mismatch_pos = -1
 	match_pos = -1
-
 	# Loop over each possible starting position in wt_seq where mut_seq can fit
 	for i in range(len(wt_seq) - len(mut_seq) + 1):
 		segment = wt_seq[i:i+len(mut_seq)]
 		mismatch_indices = [j for j in range(len(mut_seq)) if segment[j] != mut_seq[j]]
-		
 		# Check for one mismatch
 		if len(mismatch_indices) == 1:
 			mismatch_pos = i + mismatch_indices[0]  # position of mismatch in wt_seq
 			match_pos = i  # starting position of alignment in wt_seq
 			return (match_pos + 1), (mismatch_pos + 1), (match_pos + len(mut_seq))
-
 	return -1, -1
 
 
@@ -31,7 +28,6 @@ def find_match(long_seq, gene_seq):
 		return start_index, end_index
 	except ValueError:
 		return -1, -1
-
 
 def calculate_min_mismatches(target_string, string_list):
 	min_mismatches = []
@@ -57,7 +53,7 @@ def read_file_names(file_input):
 		return file_names
 
 
-def codon_bias(input_file, gene_file, protein_file, tt, usage):
+def codon_bias(input_file, gene_file, protein_file, tt, usage, mut_fasta):
 
 	wild_table = {
 	'TTT': 0, 'TTC': 0, 'TTA': 0, 'TTG': 0, 'TAT': 0, 'TAC': 0, 'TAA': 0, 'TAG': 0, 
@@ -90,11 +86,11 @@ def codon_bias(input_file, gene_file, protein_file, tt, usage):
 
 	#Keys are amino acids and values are codons in a list
 	distance_lib = dict()
-	for k, v in aa_codons.items():
-		if v not in distance_lib:
-			distance_lib[v] = [k]
+	for key, value in aa_codons.items():
+		if value not in distance_lib:
+			distance_lib[value] = [key]
 		else:
-			distance_lib[v].append(k)
+			distance_lib[value].append(key)
 
 	codon_table = {
 		'TTT': 0, 'TTC': 0, 'TTA': 0, 'TTG': 0, 'TAT': 0, 'TAC': 0, 'TAA': 0, 'TAG': 0, 
@@ -367,8 +363,8 @@ def codon_bias(input_file, gene_file, protein_file, tt, usage):
 
 def print_usage():
 	print('Usage:')
-	print('Example 1: python codon_bias.py --input_file analyzed_processed_coli_pep99.xlsx --gene_file genes.fasta --protein_file proteome.fasta --tt <1-33> --usage abs')
-	print('Example 2: python codon_bias.py --file_list file_list.txt --gene_file genes.fasta --protein_file proteome.fasta --tt <1-33> --usage abs')
+	print('Example 1: python codon_bias.py --input_file analyzed_processed_coli_pep99.xlsx --gene_file genes.fasta --protein_file proteome.fasta --tt <1-33> --usage abs --mut_fasta ih_mut_custom_species.fasta')
+	print('Example 2: python codon_bias.py --file_list file_list.txt --gene_file genes.fasta --protein_file proteome.fasta --tt <1-33> --usage abs --mut_fasta ih_mut_custom_species.fasta')
 	print('Arguments:')
 	print('--input_file    : The processed output file from run_error_analysis')
 	print('--file_list     : Text (.txt) file containing a list of input files')
@@ -376,12 +372,13 @@ def print_usage():
 	print('--protein_file  : Protein sequences in FASTA format')
 	print('--tt            : Translation table (e.g., 11)')
 	print('--usage         : Codon usage type, "abs" for absolute or "rel" for relative usage')
+	print("--mut_fasta     : Mutant FASTA file, made from generate_custom_database")
 	sys.exit(0)
 
 if __name__ == '__main__':
 	file_list = None
 	try:
-		options, remainder = getopt.getopt(sys.argv[1:], 'h', ['input_file=', 'file_list=', 'gene_file=', 'protein_file=', 'tt=', 'usage=', 'help'])
+		options, remainder = getopt.getopt(sys.argv[1:], 'h', ['input_file=', 'file_list=', 'gene_file=', 'protein_file=', 'tt=', 'usage=', 'mut_fasta=', 'help'])
 	except getopt.GetoptError:
 		print_usage()
 
@@ -390,6 +387,7 @@ if __name__ == '__main__':
 	protein_file = None
 	usage = None
 	tt = None
+	mutant_fasta_memory = None
 
 	for opt, arg in options:
 		if opt in ('-h', '--help'):
@@ -406,6 +404,8 @@ if __name__ == '__main__':
 			tt = int(arg)
 		elif opt == '--usage':
 			usage = arg
+		elif opt == '--mut_fasta':
+			mut_fasta = arg			
 
 	if usage not in ['abs', 'rel']:
 		print("Error: The 'usage' argument must be either 'abs' or 'rel'.")
@@ -429,5 +429,6 @@ if __name__ == '__main__':
 		print("Error: Missing translation table (tt) argument")
 		sys.exit(2)
 
+	mutant_fasta_memory = mutant_fasta_memory or fasta_to_dict(mut_fasta)
 	for input_file in input_files:
-		codon_bias(input_file, gene_file, protein_file, tt, usage)
+		codon_bias(input_file, gene_file, protein_file, tt, usage, mutant_fasta_memory)
