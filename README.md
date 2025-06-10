@@ -3,10 +3,10 @@
 Create the environment with either conda or mamba:
 
 ```
-conda create -n sera python=3.12 biopython numpy pandas openpyxl git
+conda create -n sera python=3.12 biopython numpy pandas openpyxl git requests
 ```
 ```
-mamba create -n sera python=3.12 biopython numpy pandas openpyxl git
+mamba create -n sera python=3.12 biopython numpy pandas openpyxl git requests
 ```
 ```
 conda activate sera
