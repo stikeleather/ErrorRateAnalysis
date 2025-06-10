@@ -40,14 +40,14 @@ def find_duplicate_sequences_with_ids(fasta_input):
 	return {seq: ids for seq, ids in seq_to_ids.items() if len(ids) > 1}
 
 def find_duplicates_in_data(workbook_in, duplicate_seq_to_ids):
-    if isinstance(workbook_in, pd.DataFrame):
-        df = workbook_in.copy()
-    else:
-        df = pd.read_excel(workbook_in)
+	if isinstance(workbook_in, pd.DataFrame):
+		df = workbook_in.copy()
+	else:
+		df = pd.read_excel(workbook_in)
 
-    duplicate_seqs = set(duplicate_seq_to_ids.keys())
-    matched_df = df[df['Sequence'].isin(duplicate_seqs)]
-    return matched_df
+	duplicate_seqs = set(duplicate_seq_to_ids.keys())
+	matched_df = df[df['Sequence'].isin(duplicate_seqs)]
+	return matched_df
 
 def find_match(long_pep, short_pep):
 	try:
@@ -70,6 +70,30 @@ def find_mismatch(wt_seq, mut_seq):
 			match_pos = i  # starting position of alignment in wt_seq
 			return (match_pos + 1), (mismatch_pos + 1), (match_pos + len(mut_seq))
 	return -1, -1
+
+def find_all_matches(protein_seq, peptide):
+	matches = []
+	start = 0
+	while True:
+		try:
+			index = protein_seq.index(peptide, start)
+			end_index = index + len(peptide)
+			matches.append((index, end_index))
+			start = index + 1
+		except ValueError:
+			break
+	return matches
+
+def find_all_mismatches(wt_seq, mut_seq):
+	matches = []
+	for i in range(len(wt_seq) - len(mut_seq) + 1):
+		segment = wt_seq[i:i+len(mut_seq)]
+		mismatch_indices = [j for j in range(len(mut_seq)) if segment[j] != mut_seq[j]]
+		if len(mismatch_indices) == 1:
+			mismatch_pos = i + mismatch_indices[0]
+			match_pos = i
+			matches.append((match_pos + 1, mismatch_pos + 1, match_pos + len(mut_seq)))
+	return matches
 
 def resolve_duplicates(fasta_file, workbook_in, protein_dic, gene_dic, duplicate_seqs=None):
 	duplicate_seqs_to_ids = duplicate_seqs or find_duplicate_sequences_with_ids(fasta_file)
@@ -141,10 +165,51 @@ def resolve_duplicates(fasta_file, workbook_in, protein_dic, gene_dic, duplicate
 		else:
 			disallowed_sequences.add(seq)
 
-	# with open("disallowed_sequences.txt", 'a') as f:
-	# 	for item in disallowed_sequences:
-	# 		f.write(f"{item}\n")
-	return disallowed_sequences
+	filtered_matched_data_duplicates = matched_data_duplicates[~matched_data_duplicates['Sequence'].isin(disallowed_sequences)].copy()
+	for idx, row in filtered_matched_data_duplicates.iterrows():
+		seq = row['Sequence']
+		accessions = row['accessions']
+		type_set = set()
+		parent_set = set()
+		for acc in accessions:
+			dash_acc = re.split(dash_pattern, acc)
+			id_type = dash_acc[0]
+			parent_name = dash_acc[1]
+			type_set.add(id_type)
+			parent_set.add(parent_name)
+			if len(parent_set) == 1:
+				if "wild" in type_set and "mutant" not in type_set:
+					protein_seq = protein_dic[parent_name]
+					matches = find_all_matches(protein_seq, seq)
+					if len(matches) > 1:
+						parent_gene_seq = gene_dic[parent_name]
+						dna_set = set()
+						for match in matches:
+							match_start = match[0] * 3
+							match_end = match[1] * 3
+							current_dna_segment = parent_gene_seq[match_start:match_end]
+							dna_set.add(current_dna_segment)
+							if len(dna_set) == 1:
+								allowed_sequences.add((seq, parent_name))
+							else:
+								disallowed_sequences.add(seq)
+				elif "mutant" in type_set and "wild" not in type_set:
+					protein_seq = protein_dic[parent_name]
+					mismatches = find_all_mismatches(protein_seq, seq)
+					if len(mismatches) > 1:
+						parent_gene_seq = gene_dic[parent_name]
+						dna_set = set()
+						for mismatch in mismatches:
+							match_start = (mismatch[0] * 3) - 3
+							match_end = mismatch[1] * 3
+							current_dna_segment = parent_gene_seq[match_start:match_end]
+							dna_set.add(current_dna_segment)
+							if len(dna_set) == 1:
+								allowed_sequences.add((seq, parent_name))
+							else:
+								disallowed_sequences.add(seq)
+
+	return disallowed_sequences, matched_data_duplicates
 
 
 def preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta, gene_file, protein_file, xle_corr, duplicate_seqs):
@@ -254,7 +319,11 @@ def preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta,
 	else:
 		gene_dic = fasta_to_dict(gene_file)
 
-	disallowed_sequences = resolve_duplicates(mut_fasta, df, protein_dic, gene_dic, duplicate_seqs)
+	resolved_duplicates = resolve_duplicates(mut_fasta, df, protein_dic, gene_dic, duplicate_seqs)
+	disallowed_sequences = resolved_duplicates[0]
+	data_duplicates = resolved_duplicates[1]
+	removed_sequences = data_duplicates[data_duplicates['Sequence'].isin(disallowed_sequences)].copy()
+	
 	processed_data = processed_data[~processed_data['Sequence'].isin(disallowed_sequences)]
 
 	with open(xle_corr,'rb') as f:
@@ -265,7 +334,12 @@ def preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta,
 		if raw_seq in xle_keys:
 			df.loc[idx, 'Sequence'] = xle_correction[raw_seq]
 
-	disallowed_sequences = resolve_duplicates(mut_fasta, df, protein_dic, gene_dic, duplicate_seqs)
+	resolved_duplicates = resolve_duplicates(mut_fasta, df, protein_dic, gene_dic, duplicate_seqs)
+	disallowed_sequences = resolved_duplicates[0]
+	xle_removed_sequences = data_duplicates[data_duplicates['Sequence'].isin(disallowed_sequences)].copy()
+	removed_sequences = pd.concat([removed_sequences, xle_removed_sequences], ignore_index=True)
+	removed_sequences = removed_sequences.drop_duplicates(subset=['Sequence'])
+	removed_sequences.to_excel(f"removed_analysis_seqs_{analyzed_workbook}", index=False)
 	processed_data = processed_data[~processed_data['Sequence'].isin(disallowed_sequences)]
 
 
@@ -277,8 +351,9 @@ def preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta,
 if __name__ == '__main__':
 	try:
 		options, remainder = getopt.getopt(sys.argv[1:],'', ['input_file=','analyzed_workbook=', 'homology_file=', 'mut_fasta=', 'gene_file=', 'protein_file=', 'xle_corr=', 'duplicate_seqs='])
-	except getopt.GetoptError:
-		print("Example: python preprocess_peptides.py --input_file wt_ecoli-1_pep99.xlsx --analyzed_workbook analyzed_wt_ecoli-1_pep99.xlsx --homology_file homology_ih_mut_custom_wt_ecoli_proteome.pkl")
+	except getopt.GetoptError as e:
+		print(f"\n{e}\n")
+		print("Example: python preprocess_peptides.py --input_file wt_ecoli-1_pep99.xlsx --analyzed_workbook analyzed_wt_ecoli-1_pep99.xlsx --homology_file homology_ih_mut_custom_wt_ecoli_proteome.pkl --mut_fasta ih_mut_custom_wt_ecoli_proteome.fasta --gene_file wt_ecoli_genes.fasta --protein_file wt_ecoli_proteome.fasta --xle_corr xle_wt-ecoli_-1_pep99.pkl")
 
 	for opt, arg in options:
 		if opt == '--input_file': 
@@ -303,4 +378,5 @@ if __name__ == '__main__':
 	if remainder:
 		print(f"Unrecognized arguments: {remainder}. These were ignored.")
 
-	preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta, gene_file, protein_file, xle_corr, duplicate_seqs)
+	dupes = find_duplicate_sequences_with_ids(mut_fasta)
+	preprocess_peptides(input_file, analyzed_workbook, homology_file, mut_fasta, gene_file, protein_file, xle_corr, dupes)

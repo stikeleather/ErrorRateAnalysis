@@ -309,7 +309,7 @@ def run_error_analysis(mut_fasta, workbook_input, protein_file, gene_file, xle_s
 
 
 	#Compares how many sequences intersected to the number of observed sequences
-	print(f"Matched Dictionary Entry {len(exist_set)} of {final_dic_len}")
+	print(f"Matched {len(exist_set)} of {final_dic_len} unique peptides")
 
 	#Determines how many non-standard sequences are in the observed data
 	total_unknowns = 0
@@ -543,7 +543,7 @@ def run_error_analysis(mut_fasta, workbook_input, protein_file, gene_file, xle_s
 		psm_dic = dict()
 		for term in exist_set:
 			psm_dic.update({term:name_seq_dic[term]})
-		print(f"Matched Dictionary Entry {len(exist_set)} of {final_dic_len}")
+		print(f"Matched {len(exist_set)} of {final_dic_len} unique peptides")
 	else:
 		psm_dic = dict()
 		for term in exist_set:
@@ -570,7 +570,7 @@ def run_error_analysis(mut_fasta, workbook_input, protein_file, gene_file, xle_s
 			row_count2 += 1
 			running_count = 0
 
-	print(f"Matched PSM {match_count} of {total_count} to Name")
+	print(f"Matched {match_count} of {total_count} PSMs to names")
 
 
 	print("Updating Database...")
