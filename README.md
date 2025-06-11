@@ -83,3 +83,4 @@ Arguments:
 ```
 
 Note, non-standard trypsin products (NSPs) searching is time-consuming. Problematic homologous NSPs are filtered during the search. NSPs that are found are saved to the custom mutant FASTA file and will improve search speeds during re-analysis of the data, or when there is an instance of an NSP appearing in multiple samples. So, try to avoid deleting the custom mutant file if you want to save time.
+

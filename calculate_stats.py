@@ -212,3 +212,4 @@ if __name__ == '__main__':
 		sys.exit(2)
 
 	calculate_stats(gene_file, file_list, tt, output_file)
+
