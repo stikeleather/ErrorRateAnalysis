@@ -432,3 +432,4 @@ if __name__ == '__main__':
 	mutant_fasta_memory = mutant_fasta_memory or fasta_to_dict(mut_fasta)
 	for input_file in input_files:
 		codon_bias(input_file, gene_file, protein_file, tt, usage, mutant_fasta_memory)
+

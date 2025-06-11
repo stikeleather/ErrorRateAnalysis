@@ -120,3 +120,4 @@ if __name__ == '__main__':
 		sys.exit(2)
 
 	format_matrix(input_file, remove_artifacts)
+
