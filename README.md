@@ -13,8 +13,8 @@ conda activate sera
 ```
 Clone the repository
 ```
-git clone https://github.com/stikeleather/ErrorRateAnalysis-public.git
-cd ErrorRateAnalysis-public
+git clone https://github.com/stikeleather/ErrorRateAnalysis.git
+cd ErrorRateAnalysis
 ```
 
 1) Parse an annotation file into proteome and gene files. When selecting a --parse argument, make sure to use a feature that contains a unique ID. Locus tags usually work, but annotation files vary.
